@@ -6,6 +6,7 @@ import numpy as np
 W,H = 560, 800
 offsetX = -0.05 * W
 offsetY = -0.01 * H
+safety_padding = 20
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-t", "--type", type=str,
@@ -15,6 +16,12 @@ ap.add_argument("-t", "--type", type=str,
 ap.add_argument(
   "--image",
   type=str,
+  required=True
+)
+
+ap.add_argument(
+  "--n_colors",
+  type=int,
   required=True
 )
 
@@ -76,3 +83,18 @@ matrix = cv2.getPerspectiveTransform(detected_points, target_points)
 img = cv2.warpPerspective(image, matrix, (W,H), cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0,0,0))
 
 cv2.imwrite("output.jpg", img)
+
+detected_avg_colors = []
+
+jump = int(H/args['n_colors'])
+for i in range(args['n_colors']):
+    cropped_color = img[i*jump+safety_padding:(i+1)*jump-safety_padding]
+    n_pixels = (cropped_color.shape[0] * cropped_color.shape[1])
+
+    b = np.sum(cropped_color[:,:,0]) / n_pixels
+    g = np.sum(cropped_color[:,:,1]) / n_pixels
+    r = np.sum(cropped_color[:,:,2]) / n_pixels
+
+    detected_avg_colors.append((r,g,b))
+
+print(detected_avg_colors)
