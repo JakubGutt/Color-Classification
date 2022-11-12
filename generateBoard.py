@@ -46,8 +46,11 @@ ARUCO_DICT = {
 	"DICT_ARUCO_ORIGINAL": cv2.aruco.DICT_ARUCO_ORIGINAL
 }
 
-shutil.rmtree('aruco_tags')
-os.makedirs('aruco_tags')
+if os.path.exists('aruco_tags'):
+	shutil.rmtree('aruco_tags')
+	os.makedirs('aruco_tags')
+else:
+	os.makedirs('aruco_tags')
 
 if ARUCO_DICT.get(args["type"], None) is None:
 	print("[INFO] ArUCo tag of '{}' is not supported".format(
