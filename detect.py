@@ -1,15 +1,16 @@
 import cv2
 import imutils
 
-image = cv2.imread("./masno.jpg")
+image = cv2.imread("./test.jpg")
 image = imutils.resize(image, height=1000)
 
-arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_100)
+arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
 arucoParams = cv2.aruco.DetectorParameters_create()
 (corners, ids, rejected) = cv2.aruco.detectMarkers(image, arucoDict,
 	parameters=arucoParams)
 
 # verify *at least* one ArUco marker was detected
+print(len(corners))
 if len(corners) > 0:
 	# flatten the ArUco IDs list
     ids = ids.flatten()

@@ -4,23 +4,26 @@ import cv2
 import sys
 import os
 import shutil
+import ast
 
-# construct the argument parser and parse the arguments
+padding = 50
+W,H = 2480, 3508
+TAG_SIZE = 300
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-t", "--type", type=str,
 	default="DICT_ARUCO_ORIGINAL",
 	help="type of ArUCo tag to generate")
 
-ap.add_argument("--topleft", type=int, default=1,
-	help="ID of top left ArUCo tag to generate")
-ap.add_argument("--topright", type=int, default=2,
-	help="ID of top right ArUCo tag to generate")
-ap.add_argument("--bottomleft", type=int, default=3,
-	help="ID of bottom left ArUCo tag to generate")
-ap.add_argument("--bottomright", type=int, default=4,
-	help="ID of bottom right ArUCo tag to generate")
+ap.add_argument(
+  "--colors",
+  type=str,
+  default='[(255,0,0), (0,255,0), (0,0,255)]'
+)
 
 args = vars(ap.parse_args())
+
+colors = ast.literal_eval(args['colors'])
 
 # define names of each possible ArUco tag OpenCV supports
 ARUCO_DICT = {
@@ -53,10 +56,29 @@ if ARUCO_DICT.get(args["type"], None) is None:
 
 arucoDict = cv2.aruco.Dictionary_get(ARUCO_DICT[args["type"]])
 
+board = np.full((H, W, 3), 255, dtype="uint8")
+
+# Draw colors from top to bottom
+vertical_offset = (int)(H/len(colors))
+for i, color in enumerate(colors):
+	cv2.rectangle(board, (0,i*vertical_offset), (W,H), color, -1)
+
 corners = ['topleft', 'topright', 'bottomleft', 'bottomright']
+corner_offsets = [(padding,padding), (padding, W-TAG_SIZE-padding), (H-TAG_SIZE-padding, padding), (H-TAG_SIZE-padding, W-TAG_SIZE-padding)]
 
 for i in range(4):
-    tag = np.zeros((300, 300, 1), dtype="uint8")
-    cv2.aruco.drawMarker(arucoDict, args[corners[i]], 300, tag, 1)
+	# Save tags to output folder in case we need to use them independly
+    tag = np.zeros((TAG_SIZE, TAG_SIZE, 1), dtype="uint8")
+    cv2.aruco.drawMarker(arucoDict, i+1, TAG_SIZE, tag, 1)
+    cv2.imwrite("aruco_tags/" + corners[i] + ".png", tag)
 
-    cv2.imwrite("aruco_tags/" + corners[i] + "_" + str(args[corners[i]]) + ".png", tag)
+	# Draw white rectangles to make tags more visible
+    x1 = corner_offsets[i][1]-padding
+    y1 = corner_offsets[i][0]-padding
+    cv2.rectangle(board, (x1,y1), (x1+TAG_SIZE+2*padding,y1+TAG_SIZE+2*padding), (255,255,255), -1)
+
+	# Draw tags on board
+    color_tag = cv2.cvtColor(tag, cv2.COLOR_GRAY2RGB)
+    board[corner_offsets[i][0]:corner_offsets[i][0] + TAG_SIZE, corner_offsets[i][1]:corner_offsets[i][1] + TAG_SIZE] = color_tag
+	
+cv2.imwrite("board.png", board)
