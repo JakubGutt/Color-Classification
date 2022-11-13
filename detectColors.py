@@ -97,4 +97,6 @@ for i in range(args['n_colors']):
 
     detected_avg_colors.append((r,g,b))
 
-print(detected_avg_colors)
+with open('detectedColors.txt', 'w') as f:
+	for color in detected_avg_colors:
+		f.write(str(round(color[0])) + ", " + str(round(color[1])) + ", " + str(round(color[2])) + "\n")
