@@ -64,7 +64,7 @@ board = np.full((H, W, 3), 255, dtype="uint8")
 # Draw colors from top to bottom
 vertical_offset = (int)(H/len(colors))
 for i, color in enumerate(colors):
-	cv2.rectangle(board, (0,i*vertical_offset), (W,H), color, -1)
+	cv2.rectangle(board, (0,i*vertical_offset), (W,H), (color[2], color[1], color[0]), -1)
 
 corners = ['topleft', 'topright', 'bottomleft', 'bottomright']
 corner_offsets = [(padding,padding), (padding, W-TAG_SIZE-padding), (H-TAG_SIZE-padding, padding), (H-TAG_SIZE-padding, W-TAG_SIZE-padding)]
