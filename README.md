@@ -120,3 +120,12 @@ It is recommended to try classifying colors using both methods and pick better o
 # Example <a name="example"></a>
 
 TODO
+
+kamerka do detect colors
+wizualizacja zakresow??
+//cv Mean do average coloru z boarda
+//słownik colorów
+kółka do testowania hough circles
+//plik z kolorami razem z generate board
+
+generate board dostaje plik z kolorami, detect colors, dopisuje do tego pliku jak te kolory wygladaja na zdjeciu a classify colors dostaje gotowy plik zeby miec nazwy

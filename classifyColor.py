@@ -6,9 +6,9 @@ import colorsys
 ap = argparse.ArgumentParser()
 
 ap.add_argument(
-  "--template_colors",
+  "--input_file",
   type=str,
-  default='detectedColors.txt'
+  default='inputColors.txt'
 )
 
 ap.add_argument(
@@ -36,14 +36,17 @@ if args['method'] not in ['rgb', 'hsv']:
     exit()
 
 color = ast.literal_eval(args['color'])
-template_colors = []
+template_colors = {}
 
-with open(args['template_colors']) as f:
+with open(args['input_file']) as f:
     for line in f.readlines():
-        template_color = []
-        for val in line.split(","):
-            template_color.append(int(val))
-        template_colors.append(template_color)
+        splitted = line.split(' ')
+        if len(splitted) != 3:
+            print("Wrong input file")
+            exit()
+        template_colors[splitted[0][:-1]] = ast.literal_eval(splitted[-1].split('=')[1])
+
+print(template_colors)
 
 def distBetweenColors(col1, col2):
     if args['method'] == 'hsv':
@@ -54,8 +57,9 @@ def distBetweenColors(col1, col2):
 
 closest_color = 0
 closest_dist = 1e+8
+
 for i, template_color in enumerate(template_colors):
-    dist = distBetweenColors(template_color, color)
+    dist = distBetweenColors(template_colors[template_color], color)
     if dist < closest_dist:
         closest_color = i
         closest_dist = dist

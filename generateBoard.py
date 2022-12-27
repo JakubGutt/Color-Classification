@@ -16,14 +16,23 @@ ap.add_argument("-t", "--type", type=str,
 	help="type of ArUCo tag to generate")
 
 ap.add_argument(
-  "--colors",
+  "--input_file",
   type=str,
-  default='[(255,0,0), (0,255,0), (0,0,255)]'
+  required=False,
+  default='./inputColors.txt'
 )
 
 args = vars(ap.parse_args())
 
-colors = ast.literal_eval(args['colors'])
+colors = {}
+
+with open(args['input_file'], 'r') as f:
+	for line in f.readlines():
+		splitted = line.split(' ')
+		if len(splitted) > 2:
+			print("Wrong input file")
+			exit()
+		colors[splitted[0][:-1]] = ast.literal_eval(splitted[1].split('=')[1])
 
 # define names of each possible ArUco tag OpenCV supports
 ARUCO_DICT = {
@@ -64,7 +73,7 @@ board = np.full((H, W, 3), 255, dtype="uint8")
 # Draw colors from top to bottom
 vertical_offset = (int)(H/len(colors))
 for i, color in enumerate(colors):
-	cv2.rectangle(board, (0,i*vertical_offset), (W,H), (color[2], color[1], color[0]), -1)
+	cv2.rectangle(board, (0,i*vertical_offset), (W,H), (colors[color][2], colors[color][1], colors[color][0]), -1)
 
 corners = ['topleft', 'topright', 'bottomleft', 'bottomright']
 corner_offsets = [(padding,padding), (padding, W-TAG_SIZE-padding), (H-TAG_SIZE-padding, padding), (H-TAG_SIZE-padding, W-TAG_SIZE-padding)]

@@ -19,9 +19,10 @@ ap.add_argument(
 )
 
 ap.add_argument(
-  "--n_colors",
-  type=int,
-  required=True
+  "--input_file",
+  type=str,
+  required=False,
+  default='./inputColors.txt'
 )
 
 args = vars(ap.parse_args())
@@ -85,17 +86,26 @@ cv2.imwrite("output.jpg", img)
 
 detected_avg_colors = []
 
-jump = int(H/args['n_colors'])
-for i in range(args['n_colors']):
+n_colors = 0
+with open(args['input_file'], 'r') as f:
+	for line in f.readlines():
+		if '[' in line:
+			n_colors += 1
+
+jump = int(H/n_colors)
+for i in range(n_colors):
     cropped_color = img[i*jump+safety_padding:(i+1)*jump-safety_padding]
-    n_pixels = (cropped_color.shape[0] * cropped_color.shape[1])
+    mean_color = cv2.mean(cropped_color)
+    detected_avg_colors.append((mean_color[2], mean_color[1], mean_color[0]))
 
-    b = np.sum(cropped_color[:,:,0]) / n_pixels
-    g = np.sum(cropped_color[:,:,1]) / n_pixels
-    r = np.sum(cropped_color[:,:,2]) / n_pixels
+with open(args['input_file'], 'r') as f:
+	lines = f.readlines()
+	for i, color in enumerate(detected_avg_colors):
+		if len(lines[i].split(' ')) != 2: 
+			print("Wrong input file")
+			exit()
+		lines[i] = lines[i].strip() + " detected=[" + (str(round(color[0])) + "," + str(round(color[1])) + "," + str(round(color[2])) + "]\n")
 
-    detected_avg_colors.append((r,g,b))
-
-with open('detectedColors.txt', 'w') as f:
-	for color in detected_avg_colors:
-		f.write(str(round(color[0])) + ", " + str(round(color[1])) + ", " + str(round(color[2])) + "\n")
+with open(args['input_file'], "w") as f:
+	for line in lines:
+		f.write(line)
